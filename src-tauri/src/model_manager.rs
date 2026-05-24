@@ -1,6 +1,8 @@
 use std::fs;
 use std::path::PathBuf;
 use std::process::{Child, Command};
+#[cfg(target_os = "windows")]
+use std::os::windows::process::CommandExt;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager};
 use tokio::io::AsyncWriteExt;
@@ -302,6 +304,9 @@ pub async fn start_llama_server(
     println!("Executing: {:?} -m {:?} --port {}", server_exe, model_path, port);
 
     let mut cmd = Command::new(&server_exe);
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+
     cmd.arg("-m").arg(&model_path)
        .arg("--host").arg("127.0.0.1")
        .arg("--port").arg(port.to_string());

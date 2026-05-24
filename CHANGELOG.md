@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.3](https://github.com/remnant-song/rikka-note/compare/app-v1.0.2...1.0.3) (2026-05-24)
+
+### Bug Fixes
+
+* enhance CSP rules for improved security ([66f17a6](https://github.com/remnant-song/rikka-note/commit/66f17a62d4cd706f22fb68f04f4327882b1c45dc))
+
 ## [1.0.2](https://github.com/remnant-song/rikka-note/compare/app-v1.0.1...1.0.2) (2026-05-24)
 
 ### Features
