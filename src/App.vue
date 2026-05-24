@@ -1,10 +1,22 @@
 <script setup lang="ts">
 import RootLayout from '@/layouts/RootLayout.vue'
+import { onErrorCaptured } from 'vue'
+import { useToast } from '@/composables/useToast'
+
+const { error } = useToast()
+
+onErrorCaptured((err) => {
+  let message = err instanceof Error ? err.message : String(err)
+
+  error(message, '应用运行异常', { duration: 0 })
+  
+  // 返回 true 以允许错误继续向上传递到 main.ts 的 errorHandler
+  return true
+})
 </script>
 
 <template>
   <RootLayout>
-    <!-- 路由渲染出口 - 核心修改 -->
     <router-view />
   </RootLayout>
 </template>

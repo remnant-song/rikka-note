@@ -104,7 +104,7 @@ const startRecording = async () => {
     state.value = 'recording'
     document.addEventListener('keydown', handleKeydown)
   } catch (e: any) {
-    error(`录音启动失败: ${e}`)
+    error(t('settings.speech.toast.recordStartFailed', { error: e }))
     state.value = 'idle'
   }
 }
@@ -121,7 +121,7 @@ const stopAndRecognize = async () => {
       info(t('settings.speech.emptyResult'))
     }
   } catch (e: any) {
-    error(`识别失败: ${e}`)
+    error(t('settings.speech.toast.recognitionFailed', { error: e }))
   } finally {
     state.value = 'idle'
   }

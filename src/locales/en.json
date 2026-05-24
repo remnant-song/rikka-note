@@ -148,7 +148,13 @@
       "selectFolder": "Select workspace folder",
       "unnamedWorkspace": "Unnamed Workspace",
       "markerCreateFailed": "Failed to create marker file in the selected folder, possibly due to insufficient permissions.",
-      "workspaceNotFound": "Workspace does not exist"
+      "workspaceNotFound": "Workspace does not exist",
+      "dbNotInit": "Database initialized failed. Please try selecting the workspace folder again, or restart the application.",
+      "dbNotInitCallFirst": "Database not initialized.Please try selecting the workspace folder again, or restart the application.",
+      "pluginNotFound": "SQL plugin not found: please check if the plugin is registered with Builder in main.rs",
+      "permissionDenied": "Permission denied: please check the permission configuration in capabilities/default.json",
+      "dbLoadFailed": "Database load failed: {error}",
+      "invalidLocalFolder": "Cannot switch: The local folder for the workspace is invalid or deleted ({path})"
     }
   },
   "record": {
@@ -205,13 +211,26 @@
       "diffPreview": {
         "title": "Edit Suggestion Preview",
         "apply": "Apply",
-        "undo": "Undo"
+        "undo": "Undo",
+        "toast": {
+          "applyFailedMissingText": "Could not find the corresponding original text fragment in the document.",
+          "applySuccess": "Note updated successfully.",
+          "applyFailedWriteError": "An error occurred while writing to the file.",
+          "undoFailedTextModified": "The applied text content has been manually modified or deleted in the editor.",
+          "undoSuccess": "Note content restored.",
+          "undoFailedError": "An error occurred during the operation."
+        }
       },
       "editMode": {
         "title": "AI Edit Mode",
         "editingSelection": "Editing: Selected fragment ({length} chars)",
         "editingFullFile": "Editing: Full file content",
         "close": "Close Edit Mode"
+      },
+      "toast": {
+        "viewingNote": "Viewing: {filename}",
+        "fileNotFound": "Could not find file in the current workspace: {filename}",
+        "aiRequestFailed": "An error occurred while requesting AI, please try again"
       }
     }
   },
@@ -326,7 +345,11 @@
       }
     },
     "local": {
-      "title": "Local Models"
+      "title": "Local Models",
+      "toast": {
+        "engineLoadError": "Engine load error: {error}",
+        "startFailed": "Failed to start: {error}"
+      }
     },
     "ai": {
       "title": "AI Models",
@@ -521,7 +544,20 @@
       "startDownloadModel": "Starting model download, please stay connected to the internet...",
       "downloadFailed": "Failed to download: {error}",
       "downloadCompleteWithFilename": "{filename} download complete",
-      "modelFileSelected": "Local model file selected"
+      "modelFileSelected": "Local model file selected",
+      "toast": {
+        "embeddingModelNotConfigured": "Embedding model not configured or unavailable, please configure it in AI settings",
+        "processingVectorsInfo": "Starting to process document vectors, this may take some time...",
+        "vectorProcessSuccess": "Successfully processed {success} documents, failed {failed} documents.",
+        "vectorProcessFailed": "An error occurred while processing document vectors, please check the console log"
+      },
+      "error": {
+        "embeddingModelNotConfigured": "Embedding model not configured or configured incorrectly",
+        "embeddingModelIncomplete": "Embedding model configuration incomplete: missing {missing}",
+        "embeddingFormatError": "Embedding result format is incorrect",
+        "rerankRequestFailed": "Rerank request failed: {status} {statusText}",
+        "rerankFormatError": "Rerank result format is incorrect"
+      }
     },
     "encryption": {
       "title": "Encryption",
@@ -649,7 +685,16 @@
         "difficulty_hard": "Hard",
         "type_factual": "Factual",
         "type_conceptual": "Conceptual",
-        "type_relational": "Relational"
+        "type_relational": "Relational",
+        "toast": {
+          "cleared": "Cleared successfully",
+          "noMarkdownFound": "No Markdown file found",
+          "generatedCases": "Generated {count} test cases",
+          "generateFailedContent": "Failed to generate test cases, please check note content and AI model configuration",
+          "generateFailedConfig": "Failed to generate, please check AI model configuration",
+          "regressionComplete": "Regression testing complete",
+          "regressionFailed": "Regression testing failed"
+        }
       },
       "colorScheme": {
         "title": "Color Scheme Debug",
@@ -696,6 +741,10 @@
       "asrModelNotReady": "ASR Model Not Downloaded",
       "vadModelReady": "VAD Model Ready",
       "vadModelNotReady": "VAD Model Not Downloaded",
+      "modelNameInt8": "SenseVoice Small (INT8) - Zh/En/Ja/Ko/Yue (Recommended)",
+      "modelDescriptionInt8": "SenseVoice Small (INT8) - Zh/En/Ja/Ko/Yue",
+      "preparing": "Preparing...",
+      "downloadFailed": "Download failed: {error}",
       "downloadingAsr": "Downloading ASR Model...",
       "downloadingVad": "Downloading VAD Model...",
       "recheck": "Recheck",
@@ -707,7 +756,12 @@
       "voiceInput": "Voice Input",
       "emptyResult": "No valid speech detected",
       "sourceOriginal": "HuggingFace (Original)",
-      "sourceMirror": "HF-Mirror (Mirror)"
+      "sourceMirror": "HF-Mirror (Mirror)",
+      "toast": {
+        "recordStartFailed": "Failed to start recording: {error}",
+        "recognitionFailed": "Recognition failed: {error}",
+        "downloadFailed": "Download failed: {error}"
+      }
     },
     "about": {
       "title": "About",

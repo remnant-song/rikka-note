@@ -2,6 +2,7 @@
 import Database from '@tauri-apps/plugin-sql';
 import { join } from '@tauri-apps/api/path';
 import {logger} from "@/utils/logger.ts";
+import { i18n } from '@/locales/index';
 
 // 数据库实例（初始为 null）
 let db: Awaited<ReturnType<typeof Database.load>> | null = null;
@@ -40,11 +41,11 @@ export async function initDb(workspacePath: string) {
         const errorMsg = (e instanceof Error ? e.message : (typeof e === 'string' ? e : JSON.stringify(e))) || 'Unknown Error';
         logger.general.error('[DB] 数据库加载失败:', errorMsg)
         if (errorMsg.includes('plugin sql not found')) {
-            throw new Error('SQL 插件未找到：请检查 main.rs 中是否用 Builder 注册插件');
+            throw new Error(i18n.global.t('workspace.toast.pluginNotFound'));
         } else if (errorMsg.includes('not allowed')) {
-            throw new Error('权限不足：请检查 capabilities/default.json 中的权限配置');
+            throw new Error(i18n.global.t('workspace.toast.permissionDenied'));
         } else {
-            throw new Error(`数据库加载失败：${errorMsg}`);
+            throw new Error(i18n.global.t('workspace.toast.dbLoadFailed', { error: errorMsg }));
         }
     }
 }
@@ -64,9 +65,10 @@ export async function closeDb() {
 }
 
 // 获取数据库实例（确保先调用 initDb 初始化）
-export async function getDb() {
+export function getDb(): NonNullable<typeof db> {
     if (!db) {
         logger.db.warn('[DB] getDb() 被调用，但当前 db 实例为 null!')
+        throw new Error(i18n.global.t('workspace.toast.dbNotInit'));
     }
     return db;
 }
@@ -78,7 +80,7 @@ export { db, currentDbPath };
 // 注意：调用此函数前必须先调用 initDb() 建立数据库连接
 export async function initAllDatabases() {
     if (!db) {
-        throw new Error('数据库未初始化，请先调用 initDb()');
+        throw new Error(i18n.global.t('workspace.toast.dbNotInitCallFirst'));
     }
 
     const { initChatsDb } = await import('./chats');

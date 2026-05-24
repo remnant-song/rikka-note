@@ -430,7 +430,7 @@ const handleClearHistory = async () => {
   const confirmed = await ask(t('settings.developer.evaluation.clearHistoryConfirm'), { kind: 'warning' })
   if (confirmed) {
     await evalStore.clearEvaluations()
-    success('已清空')
+    success(t('settings.developer.evaluation.toast.cleared'))
   }
 }
 
@@ -438,7 +438,7 @@ const handleClearBenchmarks = async () => {
   const confirmed = await ask(t('settings.developer.evaluation.clearBenchmarksConfirm'), { kind: 'warning' })
   if (confirmed) {
     await evalStore.clearBenchmarks()
-    success('已清空')
+    success(t('settings.developer.evaluation.toast.cleared'))
   }
 }
 
@@ -446,7 +446,7 @@ const handleClearRuns = async () => {
   const confirmed = await ask(t('settings.developer.evaluation.clearRunsConfirm'), { kind: 'warning' })
   if (confirmed) {
     await evalStore.clearBenchmarkRuns()
-    success('已清空')
+    success(t('settings.developer.evaluation.toast.cleared'))
   }
 }
 
@@ -466,20 +466,20 @@ const handleGenerateBenchmark = async () => {
     logger.evaluation.info(`[UI] 筛选到 ${mdFiles.length} 个 md 文件:`, mdFiles)
 
     if (mdFiles.length === 0) {
-      error('未找到 Markdown 文件')
+      error(t('settings.developer.evaluation.toast.noMarkdownFound'))
       return
     }
 
     const count = await evalStore.generateBenchmarks(mdFiles, 3)
     logger.evaluation.info(`[UI] generateBenchmarks 返回: ${count}`)
     if (count > 0) {
-      success(`已生成 ${count} 个测试用例`)
+      success(t('settings.developer.evaluation.toast.generatedCases', { count }))
     } else {
-      error('未能生成测试用例，请检查笔记内容和 AI 模型配置')
+      error(t('settings.developer.evaluation.toast.generateFailedContent'))
     }
   } catch (e) {
     logger.evaluation.error('[UI] handleGenerateBenchmark 异常:', e)
-    error('生成失败，请检查 AI 模型配置')
+    error(t('settings.developer.evaluation.toast.generateFailedConfig'))
   }
 }
 
@@ -487,10 +487,10 @@ const handleRunRegression = async () => {
   try {
     const run = await evalStore.executeBenchmarkRun()
     if (run) {
-      success(`回归测试完成`)
+      success(t('settings.developer.evaluation.toast.regressionComplete'))
     }
   } catch (e) {
-    error('回归测试失败')
+    error(t('settings.developer.evaluation.toast.regressionFailed'))
   }
 }
 

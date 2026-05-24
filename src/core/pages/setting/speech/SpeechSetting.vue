@@ -19,7 +19,7 @@
         </div>
         <div class="space-y-0.5">
           <p class="font-bold">{{ t('settings.speech.asrModelReady') }}</p>
-          <p class="font-mono text-xs opacity-80">SenseVoice Small (INT8) - 中/英/日/韩/粤</p>
+          <p class="font-mono text-xs opacity-80">{{ t('settings.speech.modelDescriptionInt8') }}</p>
         </div>
       </div>
 
@@ -209,7 +209,7 @@ const selectedAsrModel = ref('sense_voice_int8')
 const asrModels = [
   {
     id: 'sense_voice_int8',
-    name: 'SenseVoice Small (INT8) - 中/英/日/韩/粤 (推荐)',
+    name: t('settings.speech.modelNameInt8'),
     files: [
       { filename: 'model.int8.onnx', path: 'csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/main/model.int8.onnx' },
       { filename: 'tokens.txt', path: 'csukuangfj/sherpa-onnx-sense-voice-zh-en-ja-ko-yue-2024-07-17/resolve/main/tokens.txt' }
@@ -302,7 +302,7 @@ const downloadAsrModel = async () => {
   isAsrDownloading.value = true
   asrDownloadProgress.value = 0
   asrDownloadedBytes.value = 0
-  currentAsrFile.value = '准备中...'
+  currentAsrFile.value = t('settings.speech.preparing')
 
   try {
     for (const file of model.files) {
@@ -315,7 +315,7 @@ const downloadAsrModel = async () => {
     success(t('settings.speech.downloadSuccess'), t('settings.speech.asrModel'))
   } catch (e: any) {
     logger.ai.error('[Speech] ASR 模型下载失败:', e)
-    error(`下载失败: ${e}`)
+    error(t('settings.speech.downloadFailed', { error: e }))
   } finally {
     isAsrDownloading.value = false
   }
@@ -336,7 +336,7 @@ const downloadVadModel = async () => {
     success(t('settings.speech.downloadSuccess'), 'VAD')
   } catch (e: any) {
     logger.ai.error('[Speech] VAD 模型下载失败:', e)
-    error(`下载失败: ${e}`)
+    error(t('settings.speech.downloadFailed', { error: e }))
   } finally {
     isVadDownloading.value = false
   }

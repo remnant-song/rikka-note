@@ -120,7 +120,7 @@
               <Input 
                 :model-value="settingStore.localEmbeddingModelStr" 
                 @update:model-value="settingStore.setLocalEmbeddingModelStr($event as string)"
-                placeholder="文件名或绝对路径 (.gguf)"
+                :placeholder="t('settings.rag.modelPathConfig')"
                 class="h-11 rounded-xl shadow-sm font-mono text-xs"
               />
               <Button variant="outline" size="icon" class="h-11 w-11 rounded-xl shrink-0" @click="selectModelFile('embedding')">
@@ -247,7 +247,7 @@
               {{ chatState.isStarting ? t('settings.rag.starting') : t('settings.rag.startChatService') }}
             </Button>
             <Button v-else variant="destructive" @click="stopServer('chat')" class="rounded-xl h-10 px-6 font-bold shadow-lg shadow-red-600/10 active:scale-95 transition-all">
-               <Square class="w-4 h-4 mr-2 fill-current" /> 停止服务
+               <Square class="w-4 h-4 mr-2 fill-current" /> {{ t('settings.rag.stopServer') }}
             </Button>
             
             <div v-if="chatState.isRunning" class="px-4 py-2 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 text-xs font-bold flex items-center gap-2">
@@ -263,7 +263,7 @@
               <Input 
                 :model-value="settingStore.localChatModelStr" 
                 @update:model-value="settingStore.setLocalChatModelStr($event as string)"
-                placeholder="文件名或绝对路径 (.gguf)"
+                :placeholder="t('settings.rag.chatModelPathConfig')"
                 class="h-11 rounded-xl shadow-sm font-mono text-xs"
               />
               <Button variant="outline" size="icon" class="h-11 w-11 rounded-xl shrink-0" @click="selectModelFile('chat')">
@@ -759,7 +759,7 @@ const startServer = async (purpose: 'embedding' | 'chat') => {
     
     const unlistenError = await listen(`llama-server-error-${purpose}`, (event: any) => {
        state.isStarting = false
-       error(`引擎装载异常: ${event.payload}`)
+       error(t('local.toast.engineLoadError', { error: event.payload }))
        unlistenError()
     })
 
@@ -774,7 +774,7 @@ const startServer = async (purpose: 'embedding' | 'chat') => {
        flashAttn: purpose === 'chat' ? settingStore.localChatFlashAttn : true,
     })
   } catch(e: any) {
-    error(`启动失败: ${e}`)
+    error(t('local.toast.startFailed', { error: e }))
     state.isStarting = false
   }
 }

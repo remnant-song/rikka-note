@@ -10,7 +10,7 @@ export interface ChatSession {
 
 // 创建 chat_sessions 表
 export async function initChatSessionsDb() {
-  const db = await getDb()
+  const db = getDb()
   if (!db) {
     logger.db.error('[DB Session] initChatSessionsDb 失败: db 为 null')
     return
@@ -27,7 +27,7 @@ export async function initChatSessionsDb() {
 
 // 插入一条 chat_session
 export async function insertChatSession(session: Omit<ChatSession, 'id' | 'createdAt' | 'updatedAt'>) {
-  const db = await getDb()
+  const db = getDb()
   if (!db) throw new Error('Database not initialized')
   const now = Date.now()
   return await db.execute(
@@ -38,7 +38,7 @@ export async function insertChatSession(session: Omit<ChatSession, 'id' | 'creat
 
 // 获取所有 chat_sessions
 export async function getChatSessions() {
-  const db = await getDb()
+  const db = getDb()
   if (!db) {
     logger.db.warn('[DB Session] getChatSessions 被调用，但 db 为 null')
     return []
@@ -52,7 +52,7 @@ export async function getChatSessions() {
 
 // 更新一条 chat_session 的标题或更新时间
 export async function updateChatSession(session: Omit<ChatSession, 'createdAt'>) {
-  const db = await getDb()
+  const db = getDb()
   if (!db) throw new Error('Database not initialized')
   const now = Date.now()
   return await db.execute(
@@ -63,7 +63,7 @@ export async function updateChatSession(session: Omit<ChatSession, 'createdAt'>)
 
 // 更新一条 chat_session 的时间
 export async function updateChatSessionTime(id: number) {
-  const db = await getDb()
+  const db = getDb()
   if (!db) throw new Error('Database not initialized')
   const now = Date.now()
   return await db.execute(
@@ -74,7 +74,7 @@ export async function updateChatSessionTime(id: number) {
 
 // 删除一条 chat_session
 export async function deleteChatSession(id: number) {
-  const db = await getDb()
+  const db = getDb()
   if (!db) throw new Error('Database not initialized')
   return await db.execute(
       "delete from chat_sessions where id = $1",

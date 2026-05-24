@@ -10,7 +10,8 @@ import {
 import { checkRerankModelAvailable } from '@/lib/ai';
 import { Store } from "@tauri-apps/plugin-store";
 import { useToast } from "@/composables/useToast";
-import {logger} from "@/utils/logger.ts";
+import { logger } from "@/utils/logger.ts";
+import { useI18n } from "@/composables/useI18n";
 
 export const useVectorStore = defineStore('vector', () => {
   // State
@@ -21,6 +22,7 @@ export const useVectorStore = defineStore('vector', () => {
   const hasRerankModel = ref(false);
   const documentCount = ref(0);
   const { success, error, info } = useToast();
+  const { t } = useI18n();
 
   // 检查嵌入模型可用性
   const checkEmbeddingModel = async () => {
@@ -61,7 +63,7 @@ export const useVectorStore = defineStore('vector', () => {
       if (enabled) {
         const modelAvailable = await checkEmbeddingModel();
         if (!modelAvailable) {
-          error('未配置嵌入模型或模型不可用，请在AI设置中配置嵌入模型', '向量数据库');
+          error(t('rag.toast.embeddingModelNotConfigured'));
 
           // 自动禁用
           await store.set('isVectorDbEnabled', false);
@@ -121,7 +123,7 @@ export const useVectorStore = defineStore('vector', () => {
       // 检查嵌入模型是否可用
       const modelAvailable = await checkEmbeddingModel();
       if (!modelAvailable) {
-        error('未配置嵌入模型或模型不可用，请在AI设置中配置嵌入模型', '向量处理');
+        error(t('rag.toast.embeddingModelNotConfigured'));
         return;
       }
 
@@ -129,7 +131,7 @@ export const useVectorStore = defineStore('vector', () => {
       isProcessing.value = true;
 
       // 显示处理开始的提示
-      info('开始处理文档向量，这可能需要一些时间...', '向量处理');
+      info(t('rag.toast.processingVectorsInfo'));
 
       // 处理所有文档
       const result = await processAllMarkdownFiles();
@@ -145,12 +147,12 @@ export const useVectorStore = defineStore('vector', () => {
       documentCount.value = result.success; // Note: result might not return total count in exact same structure, need to verify
 
       // 显示处理结果
-      success(`成功处理 ${result.success} 个文档，失败 ${result.failed} 个文档。`, '向量处理完成');
-    } catch (error) {
+      success(t('rag.toast.vectorProcessSuccess', { success: result.success, failed: result.failed }));
+    } catch (error: any) {
       logger.rag.error('处理文档向量失败:', error);
       isProcessing.value = false;
 
-      error('处理文档向量时发生错误，请查看控制台日志', '向量处理失败');
+      error(t('rag.toast.vectorProcessFailed'));
     }
   };
 

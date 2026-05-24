@@ -248,21 +248,38 @@ const onUploadImg = async (files: File[], callback: (urls: string[]) => void) =>
 
 const triggerVlmAnalysis = async (base64: string, url: string) => {
     isAnalyzing.value = true;
+    logger.vision.info('triggerVlmAnalysis started. Image URL:', url);
     info(t('settings.vision.status.analyzingDesc'), t('settings.vision.status.analyzing'));
     try {
         const desc = await fetchAiDescByImage(base64);
+        logger.vision.info('fetchAiDescByImage returned description. Length:', desc ? desc.length : 0);
         if (desc) {
-            const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const imgRegex = new RegExp(`!\\[(.*?)\\]\\(${escapedUrl}\\)`, 'g');
-            if (imgRegex.test(text.value)) {
+            // 对 URL 进行解码，并提取末尾的 UUID 图片文件名
+            const decodedUrl = decodeURIComponent(url);
+            const filename = decodedUrl.substring(Math.max(decodedUrl.lastIndexOf('/'), decodedUrl.lastIndexOf('\\')) + 1);
+            logger.vision.debug(`Decoded URL: "${decodedUrl}", extracted filename: "${filename}"`);
+
+            const escapedFilename = filename.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // 构建正则以模糊匹配：! [ alt 字符 ] ( 任何非右括号路径 + 唯一文件名 )
+            const imgRegex = new RegExp(`!\\[(.*?)\\]\\(([^)]*?)${escapedFilename}\\)`, 'g');
+            const hasMatch = imgRegex.test(text.value);
+            logger.vision.debug(`Escaping Filename: "${escapedFilename}", Regex test result against editor text:`, hasMatch);
+            
+            if (hasMatch) {
+                logger.vision.info('Image markdown match found. Appending VLM description to text...');
+                imgRegex.lastIndex = 0; // 重置正则状态索引以确保正确替换
                 text.value = text.value.replace(imgRegex, (match) => {
                     return `${match}\n\n> 💡 **${t('settings.vision.editor.prefix')}**: ${desc.trim()}`;
                 });
                 success(t('settings.vision.status.successDesc'), t('settings.vision.status.success'));
+            } else {
+                logger.vision.warn(`VLM description was generated successfully, but the image Markdown with filename "${filename}" could not be found in the current text. No replacement was performed.`);
             }
+        } else {
+            logger.vision.warn('VLM analysis returned null or empty description.');
         }
     } catch (err) {
-        logger.vision.error('VLM identification failed:', err);
+        logger.vision.error('VLM identification failed in editor component:', err);
     } finally {
         isAnalyzing.value = false;
     }

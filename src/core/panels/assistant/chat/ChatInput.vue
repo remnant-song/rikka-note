@@ -182,15 +182,15 @@ const navigateToDoc = async (doc: RetrievedDoc) => {
     
     if (match) {
       await layoutStore.openFile(match.path)
-      info(`正在查看: ${doc.filename}`, '已跳转至笔记')
+      info(t('record.chat.toast.viewingNote', { filename: doc.filename }))
     } else {
       // 兜底逻辑：如果精准匹配失败，尝试 endsWith（处理旧索引数据）
       const fuzzyMatch = articleStore.allArticle.find(a => a.path.endsWith(doc.filename))
       if (fuzzyMatch) {
          await layoutStore.openFile(fuzzyMatch.path)
-         info(`正在查看: ${doc.filename}`, '已跳转至笔记')
+         info(t('record.chat.toast.viewingNote', { filename: doc.filename }))
       } else {
-         error(`未能在当前工作区找到文件: ${doc.filename}`, '跳转失败')
+         error(t('record.chat.toast.fileNotFound', { filename: doc.filename }))
       }
     }
   } catch (err) {
@@ -346,7 +346,7 @@ ${content.trim()}
     }
   } catch (e) {
     logger.assistant.error('Failed to perform send message', e)
-    error('请求 AI 时发生错误，请重试', '发送失败')
+    error(t('record.chat.toast.aiRequestFailed'))
   } finally {
     isSending.value = false
     input.value = ''

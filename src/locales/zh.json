@@ -148,7 +148,13 @@
       "selectFolder": "选择笔记仓库文件夹",
       "unnamedWorkspace": "未命名仓库",
       "markerCreateFailed": "无法在选择的文件夹内创建标识文件，可能是权限不足。",
-      "workspaceNotFound": "工作区不存在"
+      "workspaceNotFound": "工作区不存在",
+      "dbNotInit": "数据库未初始化。建议尝试重新选择工作区文件夹，或重启应用。",
+      "dbNotInitCallFirst": "数据库初始化失败。建议尝试重新选择工作区文件夹，或重启应用。",
+      "pluginNotFound": "SQL 插件未找到：请检查 main.rs 中是否用 Builder 注册插件",
+      "permissionDenied": "权限不足：请检查 capabilities/default.json 中的权限配置",
+      "dbLoadFailed": "数据库加载失败：{error}",
+      "invalidLocalFolder": "无法切换：仓库本地文件夹已失效或被删除 ({path})"
     }
   },
   "record": {
@@ -210,13 +216,26 @@
       "diffPreview": {
         "title": "修改建议预览",
         "apply": "应用",
-        "undo": "回退"
+        "undo": "回退",
+        "toast": {
+          "applyFailedMissingText": "未能在文档中找到对应的原始文本片段。",
+          "applySuccess": "笔记已成功更新。",
+          "applyFailedWriteError": "写入文件时发生错误。",
+          "undoFailedTextModified": "已应用的文本内容在编辑器中已被手动修改或删除。",
+          "undoSuccess": "笔记内容已恢复。",
+          "undoFailedError": "操作过程中发生错误。"
+        }
       },
       "editMode": {
         "title": "AI 编辑模式",
         "editingSelection": "正在编辑：选中片段 ({length} 字)",
         "editingFullFile": "正在编辑：全文件内容",
         "close": "关闭编辑模式"
+      },
+      "toast": {
+        "viewingNote": "正在查看: {filename}",
+        "fileNotFound": "未能在当前工作区找到文件: {filename}",
+        "aiRequestFailed": "请求 AI 时发生错误，请重试"
       }
     }
   },
@@ -331,7 +350,11 @@
       }
     },
     "local": {
-      "title": "本地模型"
+      "title": "本地模型",
+      "toast": {
+        "engineLoadError": "引擎装载异常: {error}",
+        "startFailed": "启动失败: {error}"
+      }
     },
     "ai": {
       "title": "AI 模型",
@@ -526,7 +549,20 @@
       "startDownloadModel": "开始下载模型，请保持网络连接...",
       "downloadFailed": "下载失败: {error}",
       "downloadCompleteWithFilename": "{filename} 下载完成",
-      "modelFileSelected": "已选择本地模型文件"
+      "modelFileSelected": "已选择本地模型文件",
+      "toast": {
+        "embeddingModelNotConfigured": "未配置嵌入模型或模型不可用，请在AI设置中配置嵌入模型",
+        "processingVectorsInfo": "开始处理文档向量，这可能需要一些时间...",
+        "vectorProcessSuccess": "成功处理 {success} 个文档，失败 {failed} 个文档。",
+        "vectorProcessFailed": "处理文档向量时发生错误，请查看控制台日志"
+      },
+      "error": {
+        "embeddingModelNotConfigured": "未配置嵌入模型或模型配置不正确",
+        "embeddingModelIncomplete": "嵌入模型配置不完整: 缺失 {missing}",
+        "embeddingFormatError": "嵌入结果格式不正确",
+        "rerankRequestFailed": "重排序请求失败: {status} {statusText}",
+        "rerankFormatError": "重排序结果格式不正确"
+      }
     },
     "encryption": {
       "title": "加密保护",
@@ -656,7 +692,16 @@
         "difficulty_hard": "困难",
         "type_factual": "事实",
         "type_conceptual": "概念",
-        "type_relational": "关系"
+        "type_relational": "关系",
+        "toast": {
+          "cleared": "已清空",
+          "noMarkdownFound": "未找到 Markdown 文件",
+          "generatedCases": "已生成 {count} 个测试用例",
+          "generateFailedContent": "未能生成测试用例，请检查笔记内容和 AI 模型配置",
+          "generateFailedConfig": "生成失败，请检查 AI 模型配置",
+          "regressionComplete": "回归测试完成",
+          "regressionFailed": "回归测试失败"
+        }
       },
       "colorScheme": {
         "title": "配色方案调试",
@@ -703,6 +748,10 @@
       "asrModelNotReady": "识别模型未下载",
       "vadModelReady": "检测模型已就绪",
       "vadModelNotReady": "检测模型未下载",
+      "modelNameInt8": "SenseVoice Small (INT8) - 中/英/日/韩/粤 (推荐)",
+      "modelDescriptionInt8": "SenseVoice Small (INT8) - 中/英/日/韩/粤",
+      "preparing": "准备中...",
+      "downloadFailed": "下载失败: {error}",
       "downloadingAsr": "正在下载 ASR 模型",
       "downloadingVad": "正在下载 VAD 模型",
       "recheck": "重新检测",
@@ -714,7 +763,12 @@
       "voiceInput": "语音输入",
       "emptyResult": "未识别到有效的语音",
       "sourceOriginal": "HuggingFace (原始地址)",
-      "sourceMirror": "HF-Mirror (国内镜像)"
+      "sourceMirror": "HF-Mirror (国内镜像)",
+      "toast": {
+        "recordStartFailed": "录音启动失败: {error}",
+        "recognitionFailed": "识别失败: {error}",
+        "downloadFailed": "下载失败: {error}"
+      }
     },
     "about": {
       "title": "关于",

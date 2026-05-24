@@ -127,7 +127,7 @@ export const useWorkspaceStore = defineStore('workspace', () => {
     }
 
     if (!isFolderValid) {
-      throw new Error(`无法切换：仓库本地文件夹已失效或被删除 (${found.path})`)
+      throw new Error(t('workspace.toast.invalidLocalFolder', { path: found.path }))
     }
 
     // 切换工作区前，如果加密功能已解锁，则先锁定
@@ -147,7 +147,8 @@ export const useWorkspaceStore = defineStore('workspace', () => {
       await initDb(found.path)
       await initAllDatabases()
     } catch (e) {
-      logger.explorer.warn('切换仓库时重置数据库失败', e)
+      logger.explorer.error('切换仓库时重置数据库失败:', e)
+      throw e
     }
 
     // 数据库就绪后再设置状态

@@ -223,7 +223,7 @@ export async function fetchEmbedding(text: string, throwError = false, silent = 
       } else {
         const modelInfo = await getEmbeddingModelInfo();
         if (!modelInfo) {
-          throw new Error('未配置嵌入模型或模型配置不正确');
+          throw new Error(i18n.global.t('settings.rag.error.embeddingModelNotConfigured'));
         }
         baseURL = modelInfo.baseURL;
         apiKey = modelInfo.apiKey;
@@ -241,7 +241,7 @@ export async function fetchEmbedding(text: string, throwError = false, silent = 
       if (!baseURL || !model) {
         const missing = !baseURL ? 'baseURL' : 'model';
         logger.rag.error(`嵌入模型配置不完整: 缺失 ${missing}`, { baseURL, model });
-        throw new Error(`嵌入模型配置不完整: 缺失 ${missing}`);
+        throw new Error(i18n.global.t('settings.rag.error.embeddingModelIncomplete', { missing }));
       }
       
       // 发送嵌入请求，增加对本地服务的重试机制（模型加载可能需要几秒钟）
@@ -300,7 +300,7 @@ export async function fetchEmbedding(text: string, throwError = false, silent = 
       
       const data = await response.json() as EmbeddingResponse;
       if (!data || !data.data || !data.data[0] || !data.data[0].embedding) {
-        throw new Error('嵌入结果格式不正确');
+        throw new Error(i18n.global.t('settings.rag.error.embeddingFormatError'));
       }
       
       return data.data[0].embedding;
@@ -364,7 +364,7 @@ export async function rerankDocuments(
     });
     
     if (!response.ok) {
-      throw new Error(`重排序请求失败: ${response.status} ${response.statusText}`);
+      throw new Error(i18n.global.t('settings.rag.error.rerankRequestFailed', { status: response.status, statusText: response.statusText }));
     }
     
     // 解析响应
@@ -372,7 +372,7 @@ export async function rerankDocuments(
     
     // 检查响应格式
     if (!data || !data.results) {
-      throw new Error('重排序结果格式不正确');
+      throw new Error(i18n.global.t('settings.rag.error.rerankFormatError'));
     }
     
     // 处理重排序结果
@@ -467,6 +467,7 @@ export async function createOpenAIClient(AiConfig?: AiConfig) {
     apiKey: apiKey || '',
     baseURL: baseURL,
     dangerouslyAllowBrowser: true,
+    fetch: fetch, // 使用 Tauri 提供的 HTTP 插件，以绕过 CORS/CSP 限制并处理大体积文件上传
     defaultHeaders:{
       "x-stainless-arch": null,
       "x-stainless-lang": null,
@@ -682,11 +683,56 @@ export async function fetchAiStreamToken(text: string, onUpdate: (content: strin
 }
 
 
+/**
+ * 压缩 base64 格式的图片，降低分辨率并转换为 jpeg 格式以减小体积
+ */
+async function compressImage(base64: string, maxWidth = 1024, maxHeight = 1024, quality = 0.7): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous'; // 避开可能跨域的问题
+    img.onload = () => {
+      let width = img.width;
+      let height = img.height;
+
+      // 缩放计算，等比例缩放限制在最大宽高度之内
+      if (width > maxWidth || height > maxHeight) {
+        if (width > height) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        } else {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(base64);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+      // 转为 jpeg 并设置质量以大大减小 Base64 长度
+      const compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+      resolve(compressedDataUrl);
+    };
+    img.onerror = (err) => {
+      reject(new Error('Image load failed during compression'));
+    };
+    img.src = base64;
+  });
+}
+
 export async function fetchAiDescByImage(base64: string) {
   try {
-    // 获取AI设置
+    // 获取 VLM 相关 AI 设置
     const aiConfig = await getAISettings('imageMethodModel')
     if (!aiConfig) {
+      logger.vision.warn('VLM 配置未找到，中止请求')
       toast({
         title: i18n.global.t('settings.vision.status.configError'),
         description: i18n.global.t('settings.vision.status.configErrorDesc'),
@@ -696,18 +742,33 @@ export async function fetchAiDescByImage(base64: string) {
       return null
     }
 
-    logger.vision.info('Invoking AI image model:', aiConfig.model)
-    const descContent = i18n.global.t('settings.vision.prompt')
-    
-    const openai = await createOpenAIClient(aiConfig)
-    
     // 确保 base64 格式正确 (OpenAI 要求包含 data:image/...;base64,前缀)
     let imageUrl = base64
     if (!base64.startsWith('data:image/')) {
         imageUrl = `data:image/jpeg;base64,${base64}`
     }
-    logger.vision.debug('VLM Request payload prefix check done. Image URL length:', imageUrl.length)
+    
+    // 对大图进行前端 Canvas 压缩，防止网络包过大被 SiliconFlow 限制或造成请求挂起
+    logger.vision.info('Original Image URL length:', imageUrl.length)
+    if (imageUrl.length > 200000) { // 大于约 150KB 时进行压缩
+      try {
+        logger.vision.debug('Image is large, compressing for VLM...')
+        imageUrl = await compressImage(imageUrl, 1024, 1024, 0.7)
+        logger.vision.info('Compressed Image URL length:', imageUrl.length)
+      } catch (compressErr) {
+        logger.vision.warn('Image compression failed, using original:', compressErr)
+      }
+    }
 
+    logger.vision.info('Invoking AI image model:', aiConfig.model, 'BaseURL:', aiConfig.baseURL)
+    const descContent = i18n.global.t('settings.vision.prompt')
+    
+    // 创建 OpenAI 客户端
+    logger.vision.debug('Creating OpenAI client for VLM...')
+    const openai = await createOpenAIClient(aiConfig)
+
+    // 发起 VLM API 请求，并设置 45 秒超时限制防止网络原因或服务响应过慢导致无限挂起
+    logger.vision.info(`Calling openai.chat.completions.create with model: ${aiConfig.model || ''}, timeout: 45s...`)
     const completion = await openai.chat.completions.create({
       model: aiConfig?.model || '',
       messages: [{
@@ -727,11 +788,26 @@ export async function fetchAiDescByImage(base64: string) {
       }],
       temperature: aiConfig?.temperature || 0.7,
       top_p: aiConfig?.topP || 0.7,
+    }, {
+      timeout: 45000 // 45 秒超时配置
     })
     
-    return completion.choices[0].message.content || ''
-  } catch (error) {
-    logger.vision.error('VLM API call failed:', error)
+    const result = completion.choices[0]?.message?.content || ''
+    logger.vision.info('VLM API call completed successfully. Response length:', result.length)
+    logger.vision.debug('VLM Response preview:', result.substring(0, 100))
+    return result
+  } catch (error: any) {
+    // 捕获并记录非常详细的错误信息
+    logger.vision.error('VLM API call failed with exception:', error)
+    if (error && typeof error === 'object') {
+      logger.vision.error('VLM Detailed error info:', {
+        name: error.name,
+        message: error.message,
+        status: error.status,
+        headers: error.headers,
+        stack: error.stack
+      })
+    }
     handleAIError(error, true)
     return null
   }

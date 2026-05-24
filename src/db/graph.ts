@@ -11,7 +11,7 @@ export interface Graph {
 
 // 创建 graphs 表
 export async function initGraphDb() {
-  const db = await getDb()
+  const db = getDb()
   if (!db) {
     logger.db.error('[DB Graph] initGraphDb 失败: db 为 null')
     return
@@ -44,7 +44,7 @@ export async function initGraphDb() {
 
 // 插入或更新图谱
 export async function upsertGraph(graph: Graph) {
-  const db = await getDb()
+  const db = getDb()
   if (!db) throw new Error('Database not initialized')
   return await db.execute(
     "insert or replace into graphs (articlePath, content, updatedAt, diagramType, granularity) values ($1, $2, $3, $4, $5)",
@@ -54,7 +54,7 @@ export async function upsertGraph(graph: Graph) {
 
 // 根据路径获取图谱
 export async function getGraphByPath(articlePath: string) {
-  const db = await getDb()
+  const db = getDb()
   if (!db) {
     logger.db.warn('[DB Graph] getGraphByPath 被调用，但 db 为 null')
     return null
@@ -68,7 +68,7 @@ export async function getGraphByPath(articlePath: string) {
 
 // 删除图谱
 export async function deleteGraph(articlePath: string) {
-  const db = await getDb()
+  const db = getDb()
   if (!db) throw new Error('Database not initialized')
   return await db.execute(
     "delete from graphs where articlePath = $1",

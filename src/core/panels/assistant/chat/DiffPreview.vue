@@ -135,7 +135,7 @@ const handleApply = async () => {
             if (originalFull.includes(target)) {
                 finalContent = originalFull.replace(target, props.proposed);
             } else {
-                error('未能在文档中找到对应的原始文本片段。', '应用失败');
+                error(t('record.chat.diffPreview.toast.applyFailedMissingText'));
                 return;
             }
         }
@@ -143,10 +143,10 @@ const handleApply = async () => {
         await articleStore.saveCurrentArticle(finalContent);
         await updateMessageMetadata('applied');
         
-        success('笔记已成功更新。', '修改已应用');
+        success(t('record.chat.diffPreview.toast.applySuccess'));
     } catch (err) {
         logger.assistant.error('Failed to apply edit:', err);
-        error('写入文件时发生错误。', '应用失败');
+        error(t('record.chat.diffPreview.toast.applyFailedWriteError'));
     }
 };
 
@@ -164,7 +164,7 @@ const handleUndo = async () => {
             if (currentFull.includes(appliedText)) {
                 finalContent = currentFull.replace(appliedText, props.original);
             } else {
-                error('已应用的文本内容在编辑器中已被手动修改或删除。', '回退失败');
+                error(t('record.chat.diffPreview.toast.undoFailedTextModified'));
                 return;
             }
         }
@@ -172,10 +172,10 @@ const handleUndo = async () => {
         await articleStore.saveCurrentArticle(finalContent);
         await updateMessageMetadata('suggestion');
         
-        success('笔记内容已恢复。', '已回退修改');
+        success(t('record.chat.diffPreview.toast.undoSuccess'));
     } catch (err) {
         logger.assistant.error('Failed to undo edit:', err);
-        error('操作过程中发生错误。', '回退失败');
+        error(t('record.chat.diffPreview.toast.undoFailedError'));
     }
 };
 

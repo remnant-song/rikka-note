@@ -1,5 +1,7 @@
 <div align="center">
-
+    
+  <img src="app-icon.png" width="80" height="80" alt="icon">
+  
 # Rikka Note
 
 **Privacy-First · AI-Native · Local-First · Zero-Configuration**

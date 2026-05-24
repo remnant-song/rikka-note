@@ -42,11 +42,7 @@ export const useChatStore = defineStore('chat', () => {
     // 初始化整个聊天环境
     const init = async () => {
         logger.assistant.debug('ChatStore.init() 开始执行...')
-        const db = await getDb()
-        if (!db) {
-            logger.db.warn('ChatStore.init(): 数据库尚未就绪 (null)，跳过数据初始化')
-            return
-        }
+        const db = getDb()
         logger.assistant.debug('ChatStore.init(): 数据库已就绪，准备拉取会话历史...')
 
         loading.value = true
