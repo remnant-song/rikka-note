@@ -290,11 +290,12 @@ const handleSelectFile = async (e: Event) => {
       show({ title: 'Show image failed', variant: 'error' })
     }
   } else {
-    // 使用布局仓库打开文件（默认复用当前页模式）
-    await layoutStore.openFile(path.value, { newTab: false })
+    // 异步检查并更新加密状态，确保是最新的
+    const isEncrypted = await encryptionStore.checkFileEncrypted(path.value)
+    fileIsEncrypted.value = isEncrypted
 
-    // 如果是加密文件且后端未解锁，弹出密码框
-    if (fileIsEncrypted.value && !encryptionStore.isUnlocked) {
+    // 如果是加密文件且后端未解锁，先弹出密码框，在成功解锁后再打开文件
+    if (isEncrypted && !encryptionStore.isUnlocked) {
       passwordDialogTitle.value = t('encryption.dialog.unlockTitle')
       passwordDialogDesc.value = t('encryption.dialog.unlockDesc')
       passwordDialogConfirmMode.value = false
@@ -302,13 +303,17 @@ const handleSelectFile = async (e: Event) => {
         try {
           await encryptionStore.unlock(password)
           showPasswordDialog.value = false
-          // 解锁成功，重新读取文章
+          // 解锁成功，再使用布局仓库打开文件
+          await layoutStore.openFile(path.value, { newTab: false })
           await articleStore.readArticle(path.value)
         } catch {
           passwordDialogRef.value?.setError(t('encryption.dialog.wrongPassword'))
         }
       }
       showPasswordDialog.value = true
+    } else {
+      // 普通文件或已解锁文件，直接打开
+      await layoutStore.openFile(path.value, { newTab: false })
     }
   }
 }
@@ -378,6 +383,13 @@ const handleRename = async () => {
     // 这里不再需要判断 props.item.name 是否存在，因为 FileItem 实例必然对应一个物理文件
     await rename(oldFullPath, newFullPath)
 
+    // 8.5 同步更新向量数据库的文件名
+    try {
+      await vectorStore.renameDocument(path.value, newPath)
+    } catch (err) {
+      logger.explorer.error('Update vector DB filename failed on rename:', err)
+    }
+
     // 9. 后续处理
     isEditing.value = false
     await articleStore.loadFileTree()
@@ -410,6 +422,14 @@ const handleDeleteFile = async () => {
     const fullPath = await getAbsoluteFilePath(path.value)
 
     await remove(fullPath)
+    
+    // 从向量数据库删除该文件的向量
+    try {
+      await vectorStore.deleteDocument(path.value)
+    } catch (err) {
+      logger.explorer.error('Delete vector document failed:', err)
+    }
+
     await articleStore.loadFileTree()
 
     if (path.value === activeFilePath.value) {

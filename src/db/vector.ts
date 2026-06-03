@@ -89,17 +89,73 @@ export async function getVectorDocumentsByFilename(filename: string) {
     [filename]);
 }
 
-// 通过文件名删除向量文档
+// 通过文件名/文件夹路径删除向量文档（支持前缀删除，同步清理 FTS5 索引）
 export async function deleteVectorDocumentsByFilename(filename: string) {
-  // 同步删除 FTS5 条目 (需在删除主表数据前获取 ID，或者直接按 filename 删)
-  await db!.execute(
-    "delete from vector_documents_fts where filename = $1",
-    [filename]
+  const prefix = filename + '/';
+  
+  // 1. 查找所有受影响的文档
+  const docs = await db!.select<{id: number, filename: string, chunk_id: number, content: string}[]>(
+    "select id, filename, chunk_id, content from vector_documents where filename = $1 or filename like $2",
+    [filename, prefix + '%']
   );
   
+  if (!docs.length) return;
+
+  for (const doc of docs) {
+    // 2. 从 FTS5 虚拟表中删除旧的索引记录 (遵循 FTS5 外部内容表同步规范)
+    await db!.execute(
+      "insert into vector_documents_fts(vector_documents_fts, rowid, filename, chunk_id, content) values('delete', $1, $2, $3, $4)",
+      [doc.id, doc.filename, doc.chunk_id, doc.content]
+    );
+  }
+
+  // 3. 从主表中删除
   await db!.execute(
-    "delete from vector_documents where filename = $1",
-    [filename]);
+    "delete from vector_documents where filename = $1 or filename like $2",
+    [filename, prefix + '%']
+  );
+}
+
+// 重命名文件或文件夹的向量文档
+export async function renameVectorDocuments(oldPath: string, newPath: string) {
+  const oldPrefix = oldPath + '/';
+  const newPrefix = newPath + '/';
+  
+  // 1. 查找所有受影响的文档
+  const docs = await db!.select<{id: number, filename: string, chunk_id: number, content: string}[]>(
+    "select id, filename, chunk_id, content from vector_documents where filename = $1 or filename like $2",
+    [oldPath, oldPrefix + '%']
+  );
+  
+  if (!docs.length) return;
+
+  for (const doc of docs) {
+    // 2. 从 FTS5 虚拟表中删除旧的索引记录
+    await db!.execute(
+      "insert into vector_documents_fts(vector_documents_fts, rowid, filename, chunk_id, content) values('delete', $1, $2, $3, $4)",
+      [doc.id, doc.filename, doc.chunk_id, doc.content]
+    );
+
+    // 计算新的文件名
+    let newFilename = doc.filename;
+    if (doc.filename === oldPath) {
+      newFilename = newPath;
+    } else if (doc.filename.startsWith(oldPrefix)) {
+      newFilename = newPrefix + doc.filename.substring(oldPrefix.length);
+    }
+
+    // 3. 更新主表中的文件名
+    await db!.execute(
+      "update vector_documents set filename = $1 where id = $2",
+      [newFilename, doc.id]
+    );
+
+    // 4. 将新纪录插入到 FTS5 虚拟表以重建索引
+    await db!.execute(
+      "insert into vector_documents_fts(rowid, filename, chunk_id, content) values ($1, $2, $3, $4)",
+      [doc.id, newFilename, doc.chunk_id, doc.content]
+    );
+  }
 }
 
 // 检查文件是否已存在于向量数据库中

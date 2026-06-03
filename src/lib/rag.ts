@@ -3,6 +3,8 @@ import { fetchEmbedding, rerankDocuments, checkRerankModelAvailable } from "./ai
 import { 
   upsertVectorDocument, 
   deleteVectorDocumentsByFilename, 
+  renameVectorDocuments,
+  getAllVectorDocumentFilenames,
   getSimilarDocuments,
   getFtsDocuments,
   initVectorDb,
@@ -11,8 +13,8 @@ import {
 import { invoke } from "@tauri-apps/api/core";
 import { MarkdownChunker, ChunkerOptions } from "./markdown-chunker";
 
-// 重新导出initVectorDb和checkRerankModelAvailable，使其可在其他模块中导入
-export { initVectorDb, getVectorDocumentCount, checkRerankModelAvailable };
+// 重新导出核心方法，使其可在其他模块中导入
+export { initVectorDb, getVectorDocumentCount, checkRerankModelAvailable, deleteVectorDocumentsByFilename, renameVectorDocuments };
 import { getFilePathOptions, getWorkspacePath, toWorkspaceRelativePath } from "./workspace";
 import { DirTree } from "@/stores/article";
 import { toast } from "@/components/ui/toast/use-toast";
@@ -175,6 +177,9 @@ export async function processAllMarkdownFiles(): Promise<{
       failed: 0
     };
     
+    // 记录本次扫描到的所有现有文件的逻辑相对路径
+    const existingFiles = new Set<string>();
+    
     // 递归处理文件树
     async function processTree(tree: DirTree[]): Promise<void> {
       for (const item of tree) {
@@ -182,6 +187,7 @@ export async function processAllMarkdownFiles(): Promise<{
           result.total++;
           // 获取逻辑路径（相对路径）
           const logicalPath = getLogicalPath(item);
+          existingFiles.add(logicalPath);
           const success = await processMarkdownFile(logicalPath);
           if (success) {
             result.success++;
@@ -197,6 +203,16 @@ export async function processAllMarkdownFiles(): Promise<{
       }
     }
     await processTree(fileTree);
+    
+    // 清理向量数据库中已不存在于当前工作区的旧文件向量
+    const dbDocs = await getAllVectorDocumentFilenames();
+    for (const doc of dbDocs) {
+      if (!existingFiles.has(doc.filename)) {
+        logger.rag.info(`文件 ${doc.filename} 在工作区中已不存在，正在清理其旧向量数据`);
+        await deleteVectorDocumentsByFilename(doc.filename);
+      }
+    }
+    
     return result;
   } catch (error) {
     logger.rag.error('处理工作区Markdown文件失败:', error);

@@ -31,7 +31,8 @@
     "save": "Guardar",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
-    "clickToJump": "Haga clic para saltar"
+    "clickToJump": "Haga clic para saltar",
+    "error": "Error"
   },
   "editor": {
     "placeholder": "Comience a escribir..."
@@ -160,6 +161,11 @@
         "clearDialogTitle": "Limpiar el historial",
         "clearDialogMessage": "¿Está seguro de querer borrar el historial del chat?"
       },
+      "think": {
+        "enabled": "Modo de pensamiento profundo activado",
+        "disabled": "Modo de pensamiento profundo desactivado",
+        "switchTip": "Se recomienda iniciar una nueva sesión después de cambiar el modo de pensamiento para obtener mejores resultados"
+      },
       "sessions": {
         "title": "Historial del chat",
         "new": "Nueva sesión",
@@ -187,7 +193,9 @@
         "aiAvatar": "IA",
         "userName": "Tú",
         "aiName": "Asistente",
-        "copiedToClipboard": "Copiado al portapapeles"
+        "copiedToClipboard": "Copiado al portapapeles",
+        "thinkingProcess": "Proceso de pensamiento",
+        "thinkingInProgress": "Pensando..."
       },
       "rag": {
         "enabled": "RAG activado",
@@ -208,6 +216,39 @@
         "editingFullFile": "Editando todo el contenido",
         "close": "Cerrar el modo de edición IA"
       }
+    }
+  },
+  "graph": {
+    "title": "Grafo de conocimiento",
+    "noActiveFile": "Abra una nota primero para ver el grafo",
+    "emptyTitle": "No se ha generado ningún grafo",
+    "emptyDesc": "Deje que la IA analice su nota y genere un grafo de conocimiento visual con un solo clic",
+    "generateBtn": "Generar grafo ahora",
+    "generating": "La IA está dibujando el grafo...",
+    "generatingDesc": "Analizando la lógica de la nota y construyendo la estructura de Mermaid, espere por favor",
+    "refresh": "Regenerar",
+    "type": "Tipo de diagrama",
+    "granularity": "Granularidad",
+    "granularityLabels": {
+      "coarse": "Gruesa",
+      "medium": "Media",
+      "fine": "Fina"
+    },
+    "types": {
+      "auto": "Automático",
+      "flowchart": "Flujograma",
+      "mindmap": "Mapa mental",
+      "sequenceDiagram": "Diagrama de secuencia",
+      "classDiagram": "Diagrama de clases",
+      "stateDiagram": "Diagrama de estados",
+      "erDiagram": "Diagrama ER",
+      "gantt": "Diagrama de Gantt",
+      "pie": "Diagrama de sectores",
+      "quadrantChart": "Gráfico de cuadrantes",
+      "timeline": "Línea de tiempo",
+      "sankey": "Diagrama de Sankey",
+      "gitGraph": "Grafo de Git",
+      "journey": "Viaje del usuario"
     }
   },
   "settings": {
@@ -521,12 +562,14 @@
         "assistant": "Asistente de IA",
         "explorer": "Explorador de archivos",
         "editor": "Editor",
-        "db": "Base de datos (local)",
         "ai": "Núcleo IA",
+        "rag": "Núcleo RAG",
+        "search": "Búsqueda global",
         "vision": "Visión y OCR",
+        "auth": "Autenticación y cifrado",
         "general": "General",
         "evaluation": "Evaluación RAG",
-        "auth": "Autenticación y cifrado",
+        "graph": "Grafo de conocimiento",
         "default": "Predeterminado/Otros"
       },
       "evaluation": {

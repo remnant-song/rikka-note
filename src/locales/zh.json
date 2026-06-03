@@ -31,7 +31,8 @@
     "save": "保存",
     "cancel": "取消",
     "confirm": "确认",
-    "clickToJump": "点击跳转"
+    "clickToJump": "点击跳转",
+    "error": "错误"
   },
   "editor": {
     "placeholder": "开始写作..."

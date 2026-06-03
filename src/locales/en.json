@@ -31,7 +31,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "clickToJump": "Click to Jump"
+    "clickToJump": "Click to Jump",
+    "error": "Error"
   },
   "editor": {
     "placeholder": "Start writing..."
@@ -168,6 +169,11 @@
         "clearButtonTitle": "Clear Chat History",
         "clearDialogTitle": "Clear Chat History",
         "clearDialogMessage": "Are you sure you want to clear chat history?"
+      },
+      "think": {
+        "enabled": "Deep thinking mode enabled",
+        "disabled": "Deep thinking mode disabled",
+        "switchTip": "It is recommended to start a new session after toggling thinking mode for best results"
       },
       "sessions": {
         "title": "Chat History",
@@ -612,12 +618,14 @@
         "assistant": "AI Assistant",
         "explorer": "File Explorer",
         "editor": "Editor",
-        "db": "Database (Local)",
         "ai": "AI Core",
+        "rag": "RAG Core",
+        "search": "Global Search",
         "vision": "Vision & OCR",
+        "auth": "Auth & Encryption",
         "general": "General",
         "evaluation": "RAG Evaluation",
-        "auth": "Auth & Encryption",
+        "graph": "Knowledge Graph",
         "default": "Default/Other"
       },
       "evaluation": {

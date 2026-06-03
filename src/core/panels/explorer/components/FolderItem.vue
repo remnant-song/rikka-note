@@ -1,4 +1,4 @@
-﻿// FolderItem.vue
+// FolderItem.vue
 <template>
   <Collapsible :open="isExpanded">
 
@@ -100,6 +100,7 @@ import {
 } from '@/components/ui/context-menu'
 import {useToast} from '@/composables/useToast'
 import { useI18n } from '@/composables/useI18n'
+import { useVectorStore } from '@/stores/vector'
 import { logger } from '@/utils/logger'
 
 interface Props {
@@ -108,6 +109,7 @@ interface Props {
 
 const props = defineProps<Props>()
 const articleStore = useArticleStore()
+const vectorStore = useVectorStore()
 const { show } = useToast()
 const { t } = useI18n()
 
@@ -209,6 +211,13 @@ const handleRename = async () => {
       }
 
       await rename(oldFullPath, newFullPath)
+
+      // 同步更新向量数据库中文件夹及其下文件的路径记录
+      try {
+        await vectorStore.renameDocument(path.value, newPath)
+      } catch (err) {
+        logger.explorer.error('Update vector DB filename failed on folder rename:', err)
+      }
     } else {
       // --- 情况 B: 新建文件夹创建 ---
       const fullPath = await getAbsoluteFilePath(newPath)
@@ -343,6 +352,14 @@ const handleDeleteFolder = async () => {
   try {
     const fullPath = await getAbsoluteFilePath(path.value)
     await remove(fullPath, { recursive: true })
+
+    // 同步从向量数据库删除该文件夹下所有文件的向量
+    try {
+      await vectorStore.deleteDocument(path.value)
+    } catch (err) {
+      logger.explorer.error('Delete folder vector documents failed:', err)
+    }
+
     await articleStore.loadFileTree()
 
     if (articleStore.selectedFolder === path.value) {

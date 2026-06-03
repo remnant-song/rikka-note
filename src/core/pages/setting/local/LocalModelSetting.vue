@@ -759,7 +759,7 @@ const startServer = async (purpose: 'embedding' | 'chat') => {
     
     const unlistenError = await listen(`llama-server-error-${purpose}`, (event: any) => {
        state.isStarting = false
-       error(t('local.toast.engineLoadError', { error: event.payload }))
+       error(t('settings.local.toast.engineLoadError', { error: event.payload }))
        unlistenError()
     })
 
@@ -774,7 +774,7 @@ const startServer = async (purpose: 'embedding' | 'chat') => {
        flashAttn: purpose === 'chat' ? settingStore.localChatFlashAttn : true,
     })
   } catch(e: any) {
-    error(t('local.toast.startFailed', { error: e }))
+    error(t('settings.local.toast.startFailed', { error: e }))
     state.isStarting = false
   }
 }

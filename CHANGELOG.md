@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.5](https://github.com/remnant-song/rikka-note/compare/1.0.4...1.0.5) (2026-06-03)
+
+### Features
+
+* enhance encryption handling and file access for encrypted documents ([0f0d607](https://github.com/remnant-song/rikka-note/commit/0f0d607684ae6ca0e5c5045ed198669748ce9fc0))
+
+## [1.0.4](https://github.com/remnant-song/rikka-note/compare/app-v1.0.3...1.0.4) (2026-06-03)
+
+### Features
+
+* synchronize vector database on file and folder operations ([cb78d16](https://github.com/remnant-song/rikka-note/commit/cb78d1697b430b532ab91e12241dce761e63819f))
+
 ## [1.0.3](https://github.com/remnant-song/rikka-note/compare/app-v1.0.2...1.0.3) (2026-05-24)
 
 ### Bug Fixes

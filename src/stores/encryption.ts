@@ -59,6 +59,21 @@ export const useEncryptionStore = defineStore('encryption', () => {
     async function lock(): Promise<void> {
         await invoke('lock_encryption')
         isUnlocked.value = false
+
+        // 安全清理：引入 articleStore 并清除内存中被加密文件的所有明文缓存
+        const { useArticleStore } = await import('@/stores/article')
+        const articleStore = useArticleStore()
+        for (const filePath of encryptedFiles.value) {
+            if (articleStore.fileBuffers[filePath] !== undefined) {
+                delete articleStore.fileBuffers[filePath]
+            }
+        }
+
+        // 如果当前打开的文章属于加密文件，重置内容并重新读取以展示未解锁状态
+        if (articleStore.activeFilePath && isEncrypted(articleStore.activeFilePath)) {
+            articleStore.currentArticle = ''
+            await articleStore.readArticle(articleStore.activeFilePath)
+        }
     }
 
     /** 修改密码：O(1) 操作，只重新加密 DEK */
