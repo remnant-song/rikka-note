@@ -63,7 +63,7 @@ export const useVectorStore = defineStore('vector', () => {
       if (enabled) {
         const modelAvailable = await checkEmbeddingModel();
         if (!modelAvailable) {
-          error(t('rag.toast.embeddingModelNotConfigured'));
+          error(t('settings.rag.toast.embeddingModelNotConfigured'));
 
           // 自动禁用
           await store.set('isVectorDbEnabled', false);
@@ -123,7 +123,7 @@ export const useVectorStore = defineStore('vector', () => {
       // 检查嵌入模型是否可用
       const modelAvailable = await checkEmbeddingModel();
       if (!modelAvailable) {
-        error(t('rag.toast.embeddingModelNotConfigured'));
+        error(t('settings.rag.toast.embeddingModelNotConfigured'));
         return;
       }
 
@@ -131,7 +131,7 @@ export const useVectorStore = defineStore('vector', () => {
       isProcessing.value = true;
 
       // 显示处理开始的提示
-      info(t('rag.toast.processingVectorsInfo'));
+      info(t('settings.rag.toast.processingVectorsInfo'));
 
       // 处理所有文档
       const result = await processAllMarkdownFiles();
@@ -147,12 +147,12 @@ export const useVectorStore = defineStore('vector', () => {
       documentCount.value = result.success; // Note: result might not return total count in exact same structure, need to verify
 
       // 显示处理结果
-      success(t('rag.toast.vectorProcessSuccess', { success: result.success, failed: result.failed }));
+      success(t('settings.rag.toast.vectorProcessSuccess', { success: result.success, failed: result.failed }));
     } catch (error: any) {
       logger.rag.error('处理文档向量失败:', error);
       isProcessing.value = false;
 
-      error(t('rag.toast.vectorProcessFailed'));
+      error(t('settings.rag.toast.vectorProcessFailed'));
     }
   };
 

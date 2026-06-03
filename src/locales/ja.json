@@ -31,7 +31,8 @@
     "save": "保存",
     "cancel": "キャンセル",
     "confirm": "確定",
-    "clickToJump": "クリックして移動"
+    "clickToJump": "クリックして移動",
+    "error": "エラー"
   },
   "editor": {
     "placeholder": "入力を開始..."
@@ -160,6 +161,11 @@
         "clearDialogTitle": "チャット履歴クリア",
         "clearDialogMessage": "チャット履歴をクリアしてもよろしいですか？"
       },
+      "think": {
+        "enabled": "ディープシンキングモード有効",
+        "disabled": "ディープシンキングモード無効",
+        "switchTip": "思考モードを切り替えた後、最適な結果を得るために新しいセッションを開始することをお勧めします"
+      },
       "sessions": {
         "title": "チャット履歴",
         "new": "新規セッション",
@@ -187,7 +193,9 @@
         "aiAvatar": "AI",
         "userName": "あなた",
         "aiName": "AIアシスタント",
-        "copiedToClipboard": "クリップボードにコピーしました"
+        "copiedToClipboard": "クリップボードにコピーしました",
+        "thinkingProcess": "思考プロセス",
+        "thinkingInProgress": "考え中..."
       },
       "rag": {
         "enabled": "RAG有効",
@@ -208,6 +216,39 @@
         "editingFullFile": "編集中：ファイル全体",
         "close": "編集モードを閉じる"
       }
+    }
+  },
+  "graph": {
+    "title": "知識グラフ",
+    "noActiveFile": "グラフを表示するには、まずノートを開いてください",
+    "emptyTitle": "グラフは生成されていません",
+    "emptyDesc": "AIがノートの内容を分析し、ワンクリックで視覚的な知識グラフを生成します",
+    "generateBtn": "グラフを今すぐ生成",
+    "generating": "AIがグラフを描画中...",
+    "generatingDesc": "ノートの論理を分析し、Mermaid構造を構築しています。しばらくお待ちください",
+    "refresh": "再生成",
+    "type": "ダイアグラムタイプ",
+    "granularity": "粒度",
+    "granularityLabels": {
+      "coarse": "粗い",
+      "medium": "中庸",
+      "fine": "細かい"
+    },
+    "types": {
+      "auto": "自動",
+      "flowchart": "フローチャート",
+      "mindmap": "マインドマップ",
+      "sequenceDiagram": "シーケンス図",
+      "classDiagram": "クラス図",
+      "stateDiagram": "状態遷移図",
+      "erDiagram": "ER図",
+      "gantt": "ガントチャート",
+      "pie": "円グラフ",
+      "quadrantChart": "クアドラントチャート",
+      "timeline": "タイムライン",
+      "sankey": "サンキーダイアグラム",
+      "gitGraph": "Gitグラフ",
+      "journey": "ユーザージャーニー"
     }
   },
   "settings": {
@@ -521,12 +562,14 @@
         "assistant": "AIアシスタント",
         "explorer": "ファイルエクスプローラー",
         "editor": "エディター",
-        "db": "データベース（ローカル）",
         "ai": "AIコア",
+        "rag": "RAGコア",
+        "search": "グローバル検索",
         "vision": "画像解析/OCR",
+        "auth": "認証・暗号化",
         "general": "一般",
         "evaluation": "RAG評価",
-        "auth": "認証・暗号化",
+        "graph": "知識グラフ",
         "default": "既定／その他"
       },
       "evaluation": {

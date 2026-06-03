@@ -31,7 +31,8 @@
     "save": "Speichern",
     "cancel": "Abbrechen",
     "confirm": "Bestätigen",
-    "clickToJump": "Klicken zum Springen"
+    "clickToJump": "Klicken zum Springen",
+    "error": "Fehler"
   },
   "editor": {
     "placeholder": "Beginnen Sie zu schreiben…"
@@ -160,6 +161,11 @@
         "clearDialogTitle": "Chat-Verlauf leeren",
         "clearDialogMessage": "Sind Sie sicher, dass Sie den Chat-Verlauf leeren möchten?"
       },
+      "think": {
+        "enabled": "Deep-Thinking-Modus aktiviert",
+        "disabled": "Deep-Thinking-Modus deaktiviert",
+        "switchTip": "Es wird empfohlen, nach dem Umschalten des Denkmodus eine neue Sitzung zu starten, um die besten Ergebnisse zu erzielen"
+      },
       "sessions": {
         "title": "Chat-Verlauf",
         "new": "Neue Sitzung",
@@ -187,7 +193,9 @@
         "aiAvatar": "KI",
         "userName": "Sie",
         "aiName": "KI-Assistent",
-        "copiedToClipboard": "In Zwischenablage kopiert"
+        "copiedToClipboard": "In Zwischenablage kopiert",
+        "thinkingProcess": "Denkprozess",
+        "thinkingInProgress": "Denken im Gange..."
       },
       "rag": {
         "enabled": "RAG aktiviert",
@@ -208,6 +216,39 @@
         "editingFullFile": "Bearbeite: Gesamter Dateiinhalt",
         "close": "Bearbeitungsmodus schließen"
       }
+    }
+  },
+  "graph": {
+    "title": "Wissensgraph",
+    "noActiveFile": "Bitte öffnen Sie zuerst eine Notiz, um den Graphen anzuzeigen",
+    "emptyTitle": "Noch kein Graph generiert",
+    "emptyDesc": "Lassen Sie die KI Ihre Notiz analysieren und mit einem Klick einen visuellen Wissensgraphen erstellen",
+    "generateBtn": "Graph jetzt generieren",
+    "generating": "KI zeichnet den Graphen...",
+    "generatingDesc": "Analysiere Notizlogik und baue Mermaid-Struktur auf, bitte warten",
+    "refresh": "Neu generieren",
+    "type": "Diagrammtyp",
+    "granularity": "Granularität",
+    "granularityLabels": {
+      "coarse": "Grob",
+      "medium": "Mittel",
+      "fine": "Fein"
+    },
+    "types": {
+      "auto": "Automatisch",
+      "flowchart": "Flussdiagramm",
+      "mindmap": "Mindmap",
+      "sequenceDiagram": "Sequenzdiagramm",
+      "classDiagram": "Klassendiagramm",
+      "stateDiagram": "Zustandsdiagramm",
+      "erDiagram": "ER-Diagramm",
+      "gantt": "Gantt-Diagramm",
+      "pie": "Kreisdiagramm",
+      "quadrantChart": "Quadrantendiagramm",
+      "timeline": "Zeitachse",
+      "sankey": "Sankey-Diagramm",
+      "gitGraph": "Git-Graph",
+      "journey": "User-Journey"
     }
   },
   "settings": {
@@ -480,12 +521,14 @@
         "assistant": "KI-Assistent",
         "explorer": "Datei-Explorer",
         "editor": "Editor",
-        "db": "Datenbank (Lokal)",
         "ai": "KI-Kern",
+        "rag": "RAG-Kern",
+        "search": "Globale Suche",
         "vision": "Bild & OCR",
+        "auth": "Authentifizierung & Verschlüsselung",
         "general": "Allgemein",
         "evaluation": "RAG-Auswertung",
-        "auth": "Authentifizierung & Verschlüsselung",
+        "graph": "Wissensgraph",
         "default": "Standard/Andere"
       },
       "evaluation": {
