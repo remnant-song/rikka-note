@@ -378,6 +378,13 @@ const handleRename = async () => {
     // 这里不再需要判断 props.item.name 是否存在，因为 FileItem 实例必然对应一个物理文件
     await rename(oldFullPath, newFullPath)
 
+    // 8.5 同步更新向量数据库的文件名
+    try {
+      await vectorStore.renameDocument(path.value, newPath)
+    } catch (err) {
+      logger.explorer.error('Update vector DB filename failed on rename:', err)
+    }
+
     // 9. 后续处理
     isEditing.value = false
     await articleStore.loadFileTree()
@@ -410,6 +417,14 @@ const handleDeleteFile = async () => {
     const fullPath = await getAbsoluteFilePath(path.value)
 
     await remove(fullPath)
+    
+    // 从向量数据库删除该文件的向量
+    try {
+      await vectorStore.deleteDocument(path.value)
+    } catch (err) {
+      logger.explorer.error('Delete vector document failed:', err)
+    }
+
     await articleStore.loadFileTree()
 
     if (path.value === activeFilePath.value) {

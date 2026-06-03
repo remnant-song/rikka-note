@@ -11,6 +11,7 @@ import {join} from '@tauri-apps/api/path'
 import {getFilePathOptions, getWorkspacePath, toWorkspaceRelativePath} from '@/lib/workspace'
 import {getCurrentFolder} from '@/lib/path'
 import {useEncryptionStore} from '@/stores/encryption'
+import {useVectorStore} from '@/stores/vector'
 
 // 类型定义
 export type SortType = 'name' | 'created' | 'modified' | 'none'
@@ -700,6 +701,14 @@ export const useArticleStore = defineStore('article', () => {
 
             // 4. 执行物理移动与状态更新
             await rename(sourceAbsolutePath, targetAbsolutePath)
+
+            // 5. 同步更新向量数据库中的路径
+            try {
+                const vectorStore = useVectorStore()
+                await vectorStore.renameDocument(normalizedSource, normalizedTarget)
+            } catch (err) {
+                logger.explorer.error('[ArticleStore] renameDocument error:', err)
+            }
 
             if (activeFilePath.value === sourceRelativePath) {
                 activeFilePath.value = targetRelativePath

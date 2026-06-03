@@ -5,7 +5,9 @@ import {
   processAllMarkdownFiles, 
   processMarkdownFile, 
   checkEmbeddingModelAvailable,
-  getVectorDocumentCount
+  getVectorDocumentCount,
+  deleteVectorDocumentsByFilename,
+  renameVectorDocuments
 } from '@/lib/rag';
 import { checkRerankModelAvailable } from '@/lib/ai';
 import { Store } from "@tauri-apps/plugin-store";
@@ -173,6 +175,24 @@ export const useVectorStore = defineStore('vector', () => {
     }
   };
 
+  const deleteDocument = async (filename: string): Promise<void> => {
+    try {
+      await deleteVectorDocumentsByFilename(filename);
+      // 更新文档计数
+      documentCount.value = await getVectorDocumentCount();
+    } catch (error) {
+      logger.rag.error(`从数据库删除文档 ${filename} 向量失败:`, error);
+    }
+  };
+
+  const renameDocument = async (oldFilename: string, newFilename: string): Promise<void> => {
+    try {
+      await renameVectorDocuments(oldFilename, newFilename);
+    } catch (error) {
+      logger.rag.error(`在数据库重命名文档 ${oldFilename} -> ${newFilename} 向量失败:`, error);
+    }
+  };
+
   return {
     isVectorDbEnabled,
     isRagEnabled,
@@ -185,6 +205,8 @@ export const useVectorStore = defineStore('vector', () => {
     setRagEnabled,
     processAllDocuments,
     processDocument,
+    deleteDocument,
+    renameDocument,
     checkEmbeddingModel,
     checkRerankModel
   };
