@@ -290,11 +290,12 @@ const handleSelectFile = async (e: Event) => {
       show({ title: 'Show image failed', variant: 'error' })
     }
   } else {
-    // 使用布局仓库打开文件（默认复用当前页模式）
-    await layoutStore.openFile(path.value, { newTab: false })
+    // 异步检查并更新加密状态，确保是最新的
+    const isEncrypted = await encryptionStore.checkFileEncrypted(path.value)
+    fileIsEncrypted.value = isEncrypted
 
-    // 如果是加密文件且后端未解锁，弹出密码框
-    if (fileIsEncrypted.value && !encryptionStore.isUnlocked) {
+    // 如果是加密文件且后端未解锁，先弹出密码框，在成功解锁后再打开文件
+    if (isEncrypted && !encryptionStore.isUnlocked) {
       passwordDialogTitle.value = t('encryption.dialog.unlockTitle')
       passwordDialogDesc.value = t('encryption.dialog.unlockDesc')
       passwordDialogConfirmMode.value = false
@@ -302,13 +303,17 @@ const handleSelectFile = async (e: Event) => {
         try {
           await encryptionStore.unlock(password)
           showPasswordDialog.value = false
-          // 解锁成功，重新读取文章
+          // 解锁成功，再使用布局仓库打开文件
+          await layoutStore.openFile(path.value, { newTab: false })
           await articleStore.readArticle(path.value)
         } catch {
           passwordDialogRef.value?.setError(t('encryption.dialog.wrongPassword'))
         }
       }
       showPasswordDialog.value = true
+    } else {
+      // 普通文件或已解锁文件，直接打开
+      await layoutStore.openFile(path.value, { newTab: false })
     }
   }
 }

@@ -90,11 +90,13 @@ import { logger } from '@/utils/logger';
 import {useSettingStore} from '@/stores/setting';
 import {fetchAiDescByImage} from '@/lib/ai';
 import { useToast } from '@/composables/useToast';
+import { useEncryptionStore } from '@/stores/encryption';
 
 const {t} = useI18n();
 const articleStore = useArticleStore();
 const chatStore = useChatStore();
 const settingStore = useSettingStore();
+const encryptionStore = useEncryptionStore();
 const { info, success, error: toastError } = useToast();
 
 // 编辑器内容：初始化从缓冲区取值，或读取文件
@@ -119,13 +121,39 @@ onMounted(async () => {
   observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   updateWorkspaceCache();
 
-  // 如果缓冲区没有该文件，则读取之
-  if (!articleStore.fileBuffers[props.path]) {
-    logger.editor.debug(`[MdEditor] Buffer miss, reading article: ${props.path}`);
+  // 检查是否为加密文件以及后端是否锁定
+  const isEncrypted = await encryptionStore.checkFileEncrypted(props.path);
+  if (isEncrypted && !encryptionStore.isUnlocked) {
+    logger.editor.debug(`[MdEditor] File ${props.path} is encrypted but backend is locked. Clearing buffer and forcing re-read.`);
+    // 强制清理缓冲区明文残留，防范直接显示明文
+    articleStore.updateFileBuffer(props.path, '');
+    text.value = '';
     await articleStore.readArticle(props.path);
+  } else {
+    // 如果缓冲区没有该文件，则读取之
+    if (!articleStore.fileBuffers[props.path]) {
+      logger.editor.debug(`[MdEditor] Buffer miss, reading article: ${props.path}`);
+      await articleStore.readArticle(props.path);
+    }
+    text.value = articleStore.fileBuffers[props.path] || '';
   }
-  text.value = articleStore.fileBuffers[props.path] || '';
 });
+
+// 监听解锁状态变化，一旦锁定，清除加密文件的缓存和显示
+watch(
+  () => encryptionStore.isUnlocked,
+  async (newVal) => {
+    if (!newVal) {
+      const isEncrypted = encryptionStore.isEncrypted(props.path) || await encryptionStore.checkFileEncrypted(props.path);
+      if (isEncrypted) {
+        logger.editor.debug(`[MdEditor] Backend locked. Clearing editor content for: ${props.path}`);
+        articleStore.updateFileBuffer(props.path, '');
+        text.value = '';
+        await articleStore.readArticle(props.path);
+      }
+    }
+  }
+);
 
 // 监听缓冲区变化（用于同步分屏修改）
 watch(
