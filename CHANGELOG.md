@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.0.4](https://github.com/remnant-song/rikka-note/compare/app-v1.0.3...1.0.4) (2026-06-03)
+
+### Features
+
+* synchronize vector database on file and folder operations ([cb78d16](https://github.com/remnant-song/rikka-note/commit/cb78d1697b430b532ab91e12241dce761e63819f))
+
 ## [1.0.3](https://github.com/remnant-song/rikka-note/compare/app-v1.0.2...1.0.3) (2026-05-24)
 
 ### Bug Fixes
