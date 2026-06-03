@@ -1,6 +1,6 @@
 [package]
 name = "rikka-note"
-version = "1.0.4"
+version = "1.0.5"
 description = "A Tauri App"
 authors = ["remnant_song"]
 edition = "2021"
