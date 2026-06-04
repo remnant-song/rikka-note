@@ -140,6 +140,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { tauriGet, tauriSet } from '@/utils/tauriStore'
 import { toast } from '@/components/ui/toast'
 import { exists, writeTextFile, readTextFile } from '@tauri-apps/plugin-fs'
+import { closeDb, initDb, initAllDatabases } from '@/db'
 
 const { t } = useI18n()
 const workspaceStore = useWorkspaceStore()
@@ -246,17 +247,61 @@ const handleInitRepo = async () => {
   }
 }
 
+// 通用数据库安全关闭包装器，在执行 git 操作时临时断开 SQLite 数据库连接以避免文件锁定冲突
+const withClosedDb = async <T>(action: () => Promise<T>): Promise<T> => {
+  const activeWorkspace = workspaceStore.activeWorkspace
+  if (!activeWorkspace) {
+    throw new Error('未激活工作区')
+  }
+
+  try {
+    addLog('正在临时关闭本地数据库以避免文件锁定冲突...')
+    await closeDb()
+  } catch (dbErr: any) {
+    addLog(`关闭数据库失败: ${dbErr.toString()}`, 'error')
+  }
+
+  try {
+    return await action()
+  } finally {
+    try {
+      addLog('正在重新连接数据库...')
+      await initDb(activeWorkspace.path)
+      await initAllDatabases()
+      addLog('数据库连接已恢复。')
+    } catch (dbErr: any) {
+      addLog(`恢复数据库失败: ${dbErr.toString()}`, 'error')
+    }
+  }
+}
+
 const handlePull = async () => {
   if (!workspaceStore.activeWorkspace) return
   console.log('[Sync] Pulling with config:', JSON.stringify(config))
   loading.value = true
   addLog('开始拉取最新变更...')
+
   try {
-    const res = await invoke('git_pull', { 
-      repoPath: workspaceStore.activeWorkspace.path,
-      config: { ...config }
+    await withClosedDb(async () => {
+      // 1. 拉取前先自动进行本地提交，保存本地尚未提交的更改以避免 Conflict 冲突限制
+      try {
+        addLog('拉取前尝试自动提交本地更改...')
+        const commitRes = await invoke('git_commit', {
+          repoPath: workspaceStore.activeWorkspace!.path,
+          message: `Local update before pull at ${new Date().toLocaleString()}`
+        })
+        addLog(`本地提交: ${commitRes}`)
+      } catch (commitErr: any) {
+        addLog(`自动本地提交失败: ${commitErr.toString()}`, 'error')
+      }
+
+      // 2. 执行拉取与合并
+      const res = await invoke('git_pull', { 
+        repoPath: workspaceStore.activeWorkspace!.path,
+        config: { ...config }
+      })
+      addLog(res as string)
     })
-    addLog(res as string)
   } catch (e: any) {
     addLog(e.toString(), 'error')
   } finally {
@@ -270,12 +315,14 @@ const handlePush = async () => {
   loading.value = true
   addLog('开始推送变更...')
   try {
-    const res = await invoke('git_commit_and_push', { 
-      repoPath: workspaceStore.activeWorkspace.path,
-      config: { ...config },
-      message: `Sync at ${new Date().toLocaleString()}`
+    await withClosedDb(async () => {
+      const res = await invoke('git_commit_and_push', { 
+        repoPath: workspaceStore.activeWorkspace!.path,
+        config: { ...config },
+        message: `Sync at ${new Date().toLocaleString()}`
+      })
+      addLog(res as string)
     })
-    addLog(res as string)
   } catch (e: any) {
     addLog(e.toString(), 'error')
   } finally {
@@ -284,8 +331,49 @@ const handlePush = async () => {
 }
 
 const handleSyncAll = async () => {
-  await handlePull()
-  await handlePush()
+  if (!workspaceStore.activeWorkspace) return
+  console.log('[Sync] SyncAll with config:', JSON.stringify(config))
+  loading.value = true
+  addLog('开始同步全部变动...')
+  try {
+    await withClosedDb(async () => {
+      // 1. 本地提交
+      try {
+        addLog('同步前尝试自动提交本地更改...')
+        const commitRes = await invoke('git_commit', {
+          repoPath: workspaceStore.activeWorkspace!.path,
+          message: `Local update before sync at ${new Date().toLocaleString()}`
+        })
+        addLog(`本地提交: ${commitRes}`)
+      } catch (commitErr: any) {
+        addLog(`自动本地提交失败: ${commitErr.toString()}`, 'error')
+      }
+
+      // 2. 拉取合并
+      try {
+        const pullRes = await invoke('git_pull', { 
+          repoPath: workspaceStore.activeWorkspace!.path,
+          config: { ...config }
+        })
+        addLog(pullRes as string)
+      } catch (pullErr: any) {
+        addLog(`拉取合并失败: ${pullErr.toString()}`, 'error')
+        throw pullErr
+      }
+
+      // 3. 推送合并结果
+      const pushRes = await invoke('git_commit_and_push', { 
+        repoPath: workspaceStore.activeWorkspace!.path,
+        config: { ...config },
+        message: `Sync at ${new Date().toLocaleString()}`
+      })
+      addLog(pushRes as string)
+    })
+  } catch (e: any) {
+    addLog(`同步失败: ${e.toString()}`, 'error')
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(loadConfig)

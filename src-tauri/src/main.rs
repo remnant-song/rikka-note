@@ -84,6 +84,7 @@ fn main() {
             speech::stop_recording_and_recognize,
             speech::download_speech_model,
             git::git_commit_and_push,
+            git::git_commit,
             git::git_pull,
             git::git_status,
             git::git_init_repo,
