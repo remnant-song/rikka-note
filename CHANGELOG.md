@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/remnant-song/rikka-note/compare/1.0.5...1.0.6) (2026-06-04)
+
+### Features
+
+* enhance thinking tag handling in MessageItem.vue ([77f0e24](https://github.com/remnant-song/rikka-note/commit/77f0e243a2712714fb6a39d2b71a72315e83996f))
+* implement git commit functionality with automatic local changes handling ([7f95b1f](https://github.com/remnant-song/rikka-note/commit/7f95b1f23196f430019a946eb5bd126f5936a948))
+
 ## [1.0.5](https://github.com/remnant-song/rikka-note/compare/1.0.4...1.0.5) (2026-06-03)
 
 ### Features
