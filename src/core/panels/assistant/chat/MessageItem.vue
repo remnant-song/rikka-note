@@ -86,10 +86,22 @@ const chatStore = useChatStore()
 
 const isThinkingOpen = ref(false)
 
+// 剥离思考过程（支持已闭合和流式未闭合标签）
+const stripThinking = (content: string): string => {
+  if (!content) return '';
+  // 1. 移除已闭合的 thinking 标签及其中的内容
+  let clean = content.replace(/<thinking>[\s\S]*?<\/thinking>/g, '');
+  // 2. 处理流式传输中未闭合的 thinking 标签，截断其后的内容
+  const openTagIndex = clean.indexOf('<thinking>');
+  if (openTagIndex !== -1) {
+    clean = clean.substring(0, openTagIndex);
+  }
+  return clean.trim();
+}
+
 // 提取并清洗掉思考过程后的剩余内容
 const displayContent = computed(() => {
-  if (!props.message.content) return '';
-  return props.message.content.replace(/<thinking>[\s\S]*?<\/thinking>/g, '').trim();
+  return stripThinking(props.message.content);
 })
 
 // 解析思考过程
@@ -137,8 +149,9 @@ const proposalData = computed(() => {
     }
   }
 
-  // 2. 匹配 ```proposal 内容 ```
-  const proposalMatch = props.message.content.match(/([\s\S]*?)```proposal\s*([\s\S]*?)```([\s\S]*)/);
+  // 2. 使用剥离思考标签后的内容进行提案匹配，避免匹配到 <thinking> 内部的 ```proposal 块
+  const cleanContent = stripThinking(props.message.content);
+  const proposalMatch = cleanContent.match(/([\s\S]*?)```proposal\s*([\s\S]*?)```([\s\S]*)/);
   if (proposalMatch) {
     const [_, prefix, proposed, suffix] = proposalMatch;
     
