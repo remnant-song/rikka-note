@@ -74,6 +74,52 @@ pub async fn git_commit_and_push(
 }
 
 #[tauri::command]
+pub async fn git_commit(
+    repo_path: String,
+    message: String,
+) -> Result<String, String> {
+    println!("=== [DEBUG] git_commit: repo_path={}", repo_path);
+    let repo = Repository::open(&repo_path).map_err(|e| format!("无法打开仓库: {}", e))?;
+    
+    // 1. Add all
+    let mut index = repo.index().map_err(|e| e.to_string())?;
+    index.add_all(["*"].iter(), git2::IndexAddOption::DEFAULT, None).map_err(|e| e.to_string())?;
+    index.write().map_err(|e| e.to_string())?;
+    
+    let tree_id = index.write_tree().map_err(|e| e.to_string())?;
+    let tree = repo.find_tree(tree_id).map_err(|e| e.to_string())?;
+    
+    // 2. Commit
+    let signature = Signature::now("Rikka Note", "sync@rikka.note").map_err(|e| e.to_string())?;
+    let parent_commit = match repo.head() {
+        Ok(head) => Some(head.peel_to_commit().map_err(|e| e.to_string())?),
+        Err(_) => None,
+    };
+    
+    if let Some(ref parent) = parent_commit {
+        if parent.tree_id() == tree_id {
+            return Ok("本地无变更，无需提交".to_string());
+        }
+    }
+    
+    let parents = match &parent_commit {
+        Some(c) => vec![c],
+        None => vec![],
+    };
+    
+    repo.commit(
+        Some("HEAD"),
+        &signature,
+        &signature,
+        &message,
+        &tree,
+        &parents,
+    ).map_err(|e| e.to_string())?;
+
+    Ok("提交成功".to_string())
+}
+
+#[tauri::command]
 pub async fn git_pull(
     repo_path: String,
     config: GitConfig,

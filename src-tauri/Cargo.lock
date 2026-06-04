@@ -5453,7 +5453,7 @@ checksum = "47b34b781b31e5d73e9fbc8689c70551fd1ade9a19e3e28cfec8580a79290cc4"
 
 [[package]]
 name = "rikka-note"
-version = "1.0.4"
+version = "1.0.5"
 dependencies = [
  "argon2",
  "base64 0.22.1",
