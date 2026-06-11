@@ -2,13 +2,25 @@ use std::path::{Path, PathBuf};
 use std::fs;
 
 fn main() {
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+
     // 1. Windows 平台特有的 DLL 自动补全逻辑
     // 必须在 tauri_build::build() 之前运行，否则 Tauri 会因为找不到资源文件而报错
     #[cfg(target_os = "windows")]
     {
         copy_sherpa_dlls();
+        // 复制核心 DLL 到 bin/win64/ 确保运行时能找到
+        let prebuilt_dll = Path::new(&manifest_dir).join("prebuilt").join("rikka_note_lib.dll");
+        let dest_dll = Path::new(&manifest_dir).join("bin").join("win64").join("rikka_note_lib.dll");
+        if prebuilt_dll.exists() && !dest_dll.exists() {
+            fs::copy(&prebuilt_dll, &dest_dll).ok();
+        }
     }
-
+    // 链接预编译的核心 DLL（rikka_note_lib.dll）
+    // 显式传递导入库绝对路径给链接器（只有 desktop_run 一个符号需要解析，
+    // 其他 sherpa-onnx/webview2 等依赖已在 DLL 内部解析完毕）
+    let import_lib = Path::new(&manifest_dir).join("prebuilt").join("rikka_note_lib.dll.lib");
+    println!("cargo:rustc-link-arg={}", import_lib.display());
     // 2. 执行 Tauri 默认构建流程
     tauri_build::build();
 }
